@@ -2,24 +2,26 @@ import { TrashIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 
 const Task = ({
   task,
-  setTasks,
-  tasks,
+  dispatch,
   setId,
   setName,
   setDate,
   isEditing,
   setIsEditing,
 }) => {
-  const handleDelete = () => {
-    let result = tasks.filter((myTask) => myTask.id !== task.id);
-    setTasks(result);
-  };
+  // const handleDelete = () => {
+
+  //   let result = tasks.myTasks.filter((myTask) => myTask.id !== task.id);
+  //   setTasks(result);
+  // };
 
   const handleEdit = () => {
     setName(task.name);
     setDate(task.date);
     setId(task.id);
-    setIsEditing(!isEditing);
+    dispatch({type:"EDIT_TASK"})
+    
+    
   };
   return (
     <div className="flex justify-between p-4 bg-white text-black rounded-md shadow-md hover:bg-blue-200 transition ease-in-out duration-300">
@@ -35,7 +37,7 @@ const Task = ({
       </div>
       <div>
         <button>
-          <TrashIcon className="h-6 w-6 text-red-500" onClick={handleDelete} />
+          <TrashIcon className="h-6 w-6 text-red-500" onClick={()=>dispatch({type:"DELETE_TASK", payload:task.id})} />
         </button>
 
         <button>

@@ -1,24 +1,55 @@
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-import { useState } from "react";
 import Task from "./Task";
 
+import { useReducer, useState } from "react";
+
+const tasksReducer = (state, action) => {
+  switch (action.type) {
+    case "ADD_TO_TASK":
+      console.log("*************");
+      console.log(action.payload);
+      console.log("(((((()))))))))))");
+      console.log({ ...state, myTasks: [...state.myTasks, action.payload] });
+      return { ...state, myTasks: [...state.myTasks, action.payload] };
+
+    case "DELETE_TASK":
+      let newTask = state.myTasks.filter(
+        (tasks) => tasks.id !== action.payload
+      );
+      console.log(newTask);
+      return { ...state, myTasks: newTask };
+    case "EDIT_TASK":
+      return { ...state, editing: true };
+    case "UPDATE_TASK":
+      let newTasks = state.myTasks.map((tasks) =>
+        tasks.id === action.payload.id ? action.payload : tasks
+      );
+      return { ...state, editing: false, myTasks: newTasks };
+
+    default:
+      return state;
+  }
+};
+
 export default function App() {
+  let initialTask = {
+    myTasks: [],
+    editing: false,
+  };
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [id, setId] = useState("");
-  const [tasks, setTasks] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
+
+  const [tasks, dispatch] = useReducer(tasksReducer, initialTask);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     let generateId = Date.now().toString();
     if (name && date) {
-      tasks.push({
-        id: generateId,
-        name: name,
-        date: date,
+      dispatch({
+        type: "ADD_TO_TASK",
+        payload: { id: generateId, name: name, date: date },
       });
 
       toast.success("task added successfully");
@@ -31,15 +62,12 @@ export default function App() {
 
   const editTask = (e) => {
     e.preventDefault();
-    let recentTask = tasks.map((newTask) => {
-      if (newTask.id === id) {
-        return { ...newTask, name: name, date: date };
-      }
-      return newTask;
-    });
-    console.log(recentTask);
-    setTasks(recentTask);
-    setIsEditing(false);
+    if (name && date) {
+      dispatch({
+        type: "UPDATE_TASK",
+        payload: { id: id, name: name, date: date },
+      });
+    }
     clearFields();
   };
 
@@ -57,7 +85,7 @@ export default function App() {
         <form
           action=""
           className="flex flex-col space-y-5 p-5"
-          onSubmit={isEditing ? editTask : handleSubmit}
+          onSubmit={tasks.editing ? editTask : handleSubmit}
         >
           <p>
             <input
@@ -87,7 +115,7 @@ export default function App() {
               className="bg-orange-500 py-2 px-5 transition ease-in-out hover:bg-blue-800 rounded-sm w-full
             "
             >
-              {isEditing ? "Update Task" : "Save Task"}
+              {tasks.editing ? "Update Task" : "Save Task"}
             </button>
           </p>
         </form>
@@ -99,19 +127,16 @@ export default function App() {
           <hr className="bg-white" />
           <br />
           <div className="space-y-3">
-            {tasks.length !== 0 ? (
-              tasks.map((task) => (
+            {tasks.myTasks.length !== 0 ? (
+              tasks.myTasks.map((task) => (
                 <Task
                   task={task}
-                  setTasks={setTasks}
+                  dispatch={dispatch}
                   key={task.id}
-                  tasks={tasks}
                   id={id}
                   setId={setId}
                   setName={setName}
                   setDate={setDate}
-                  isEditing={isEditing}
-                  setIsEditing={setIsEditing}
                 />
               ))
             ) : (
